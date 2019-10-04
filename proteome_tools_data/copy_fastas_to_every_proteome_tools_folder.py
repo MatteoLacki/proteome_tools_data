@@ -3,23 +3,17 @@ import json
 from pathlib import Path
 import shutil
 
-ls = lambda p: list(p.glob('*'))
+from proteome_tools_data.file_iteration import all_res
 
+ls = lambda p: list(p.glob('*'))
 pools = {}
 for f in Path('U:/Matteo/poligono').glob('pool*.json'):
     with f.open('r') as h:
         pools[f.stem] = json.load(h)
+
 proj2fasta = {Path(p).stem: Path(f) for p,f in chain(pools['pool1'], pools['pool2'])}
 
-
-def all_res(res):
-    for pool in ('pool1', 'pool2'):
-        for f in (res/pool).glob('*'):
-            if f.stem[0] in ('S','T'):
-                yield from f.glob('*')
-
-res = Path('D:/projects/proteome_tools/RES')
-proj2path = {p.stem: p for p in all_res(res)}
+proj2path = {p.stem: p for p in all_res}
 
 # copy all fastas to existing projects
 for proj, proj_path in proj2path.items():
