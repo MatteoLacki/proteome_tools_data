@@ -6,15 +6,12 @@ from pep2prot.string_ops import find_indices3
 from pprint import pprint
 from furious_fastas import fastas, Fastas
 from collections import defaultdict
-import json
 
-from file_iteration import all_res, get_pools_and_proj2fastas
-
-ls = lambda p: list(p.glob('*'))
-res = Path('D:/projects/proteome_tools/RES')
+from proteome_tools_data.file_iteration import all_res
+from proteome_tools_data.file_iteration import get_pools_proj2fasta
 
 
-def getdata(p, no_decoys=True):
+def getdata(p, proj2fasta, no_decoys=True):
     X = pd.read_csv(p/"report.csv")
     X = X[X.type.isin({'PEP_FRAG_1', 'PEP_FRAG_2', 'VAR_MOD', 'MISSING_CLEAVAGE'})]
     F = fastas(proj2fasta[p.stem])
@@ -42,8 +39,8 @@ def get_main_coverage(Y, fasta):
     total_len = len(fasta)
     return covered/total_len
 
-def get_coverage(report_path):
-    X, F, concat_fasta, qc_fastas = getdata(report_path)
+def get_coverage(report_path, proj2fasta):
+    X, F, concat_fasta, qc_fastas = getdata(report_path, proj2fasta)
     qc_prots2peps = {qc_prot:[pep for pep in X.sequence if is_qc(pep, qc_prot)]
                               for qc_prot in qc_fastas}
     qc_peps = {pep for peps in qc_prots2peps.values() for pep in peps}
@@ -55,10 +52,12 @@ def get_coverage(report_path):
     coverages['peptide_coverage'] = get_main_coverage(other_peps, concat_fasta)
     return coverages
 
-def iter_res(res):
+def iter_res():
+    res = Path('D:/projects/proteome_tools/RES')
+    _, proj2fasta = get_pools_proj2fasta()
     for p in all_res(res):
         try:
-            res = get_coverage(p)
+            res = get_coverage(p, proj2fasta)
             res['acquired_name'] = p.stem
             res['fasta'] = proj2fasta[p.stem].name
             res['pool'] = int(p.parent.parent.stem[-1])
@@ -67,9 +66,8 @@ def iter_res(res):
             print(p)
             pass
 
-# it = iter_res(res)
-RES = pd.DataFrame(iter_res(res))
+# next(iter_res())
+RES = pd.DataFrame(iter_res())
 RES.columns
 RES.to_csv(res/'overlook.csv')
-
 RES.to_csv()
