@@ -66,8 +66,7 @@ def iter_res():
             print(p)
             pass
 
-# next(iter_res())
 RES = pd.DataFrame(iter_res())
 RES.columns
 RES.to_csv(res/'overlook.csv')
-RES.to_csv()
+
