@@ -1,7 +1,8 @@
 from pathlib import Path
 from itertools import chain
 
-def all_res(res):
+def all_res():
+    res = Path('D:/projects/proteome_tools/RES')
     for pool in ('pool1', 'pool2'):
         for f in (res/pool).glob('*'):
             if f.stem[0] in ('S','T'):
