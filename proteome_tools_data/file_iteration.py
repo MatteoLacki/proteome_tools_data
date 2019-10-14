@@ -19,3 +19,4 @@ def get_pools_proj2fasta():
             pools[f.stem] = json.load(h)
     proj2fasta = {Path(p).stem: Path(f) for p,f in chain(pools['pool1'], pools['pool2'])}
     return pools, proj2fasta
+
