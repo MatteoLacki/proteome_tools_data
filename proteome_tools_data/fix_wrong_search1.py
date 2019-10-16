@@ -4,13 +4,19 @@ from pathlib import Path
 import shutil
 from furious_fastas import Fastas, fastas
 from furious_fastas.fasta import NCBIgeneralFasta
-from vodkas import iadbs
+from vodkas import iadbs, wx2csv
+from vodkas.logging import get_logger
+import logging
+import pandas as pd
 
+from proteome_tools_data.recalculate_coverages import iter_res
+from proteome_tools_data.file_iteration import all_res, get_pools_proj2fasta
 
 pt = Path("J:/proteome_tools")
 
 with open(pt/"pool1fix.json", 'r') as f:
     pool1fix = json.load(f)
+
 res_path = Path(r'D:\projects\proteome_tools\RES\pool1')
 
 logging.basicConfig(filename=res_path.parent/"fix_pool1_fastas.log",
@@ -44,4 +50,20 @@ for raw, fasta in pool1fix:
     except Exception as e:
         problems.append((str(f), repr(e)))
         logger.warning(repr(e))
+
+troubles = []
+# raw,_ = pool1fix[0]
+for raw,_ in pool1fix:
+    raw = Path(raw)
+    res_folder = res_path/raw.parent.stem/raw.stem
+    try:
+        df,_ = wx2csv(res_folder/'reversed_search'/f"{raw.stem}_IA_workflow.xml",
+                      res_folder/'reversed_search'/f"{raw.stem}_report.csv")
+    except Exception as e:
+        print(e)
+        troubles.append(e)
+
+RES = pd.DataFrame(iter_res())
+
+
 

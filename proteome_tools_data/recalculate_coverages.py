@@ -55,7 +55,8 @@ def get_coverage(report_path, proj2fasta):
 def iter_res():
     res = Path('D:/projects/proteome_tools/RES')
     _, proj2fasta = get_pools_proj2fasta()
-    for p in all_res(res):
+    # p = all_res[0]
+    for p in all_res:
         try:
             res = get_coverage(p, proj2fasta)
             res['acquired_name'] = p.stem
