@@ -3,14 +3,18 @@ from pathlib import Path
 from furious_fastas import Fastas, fastas
 
 
+def find_target(FF):
+    return next(f for f in FF if 'TUM_' in f.header)
+
 def get_input_for_coverages(report_path, fasta_path):
     X = pd.read_csv(report_path)
+    all_peptides_no = len(X)
     FF = fastas(fasta_path)
-    target = max(FF, key=lambda x: len(str(x)))
+    target = find_target(FF)
     qcs = [f for f in FF if not 'Reversed' in f.header and str(f) != str(target)]
     X = X[X.type.isin({'PEP_FRAG_1', 'PEP_FRAG_2', 'VAR_MOD', 'MISSING_CLEAVAGE'})]
     peptides = list(X.sequence)
-    return peptides, target, qcs
+    return peptides, target, qcs, all_peptides_no
 
 
 def get_coverages(peptides, target, qcs):

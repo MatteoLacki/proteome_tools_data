@@ -30,6 +30,7 @@ def reformulate_fasta(f):
     pack = pack[1:]
     return NCBIgeneralFasta(pack, pack, desc, f.sequence)
 
+
 # raw, fasta = pool1fix[0]
 for raw, fasta in pool1fix:
     # copy
@@ -77,25 +78,44 @@ for proj_folder in res.glob("pool*/*/*"):
         troubles.append(e)
 
 # proj_folder = next(res.glob("pool*/*/*"))
-def iter_coverages(res):
+def iter_results(res):
     for proj_folder in res.glob("pool*/*/*"):
         report_path = proj_folder/"reversed_search"/f"{proj_folder.stem}_report.csv"
         fasta_path = next(proj_folder.glob("*_reversed.fasta"))
-        yield get_coverages(*get_input_for_coverages(report_path, fasta_path))
+        peptides, target, qcs, all_peptides_no = get_input_for_coverages(report_path, fasta_path)
+        r = get_coverages(peptides, target, qcs)
+        r['fasta'] = fasta_path.stem
+        r['proj_no'] = proj_folder.stem
+        r['pool'] = proj_folder.parent.parent.stem
+        r['all_peptides_no'] = all_peptides_no
+        r['filtered_peptides_no'] = len(peptides)
+        yield r
 
-outlook = pd.DataFrame(iter_coverages(res))
+outlook = pd.DataFrame(iter_results(res))
+outlook = outlook.set_index('proj_no')
 
-
-
-
-# compare this to the list of wanted results.
 pd.set_option('display.max_rows', 10)
 pd.set_option('display.max_columns', 100)
 
 DIA = pd.read_csv(pt/'DIA.csv')
+DIA = DIA.rename(columns={'Raw_File':'proj_no'})
+DIA = DIA.set_index('proj_no')
+
+final_outlook = outlook.merge(DIA, on='proj_no')
+final_outlook = final_outlook.drop(columns=['parsed_name', 'fasta_file', 'path','MS_Methode','LC_Methode',])
+final_outlook = final_outlook[['Sample_Name','pool','fasta','all_peptides_no','filtered_peptides_no','JPT_QC_Peptide','JPT_RT_Peptide','PRTC_RT_Peptide','target_no_qc_peps','target_with_qc_peps']]
+final_outlook = final_outlook.rename(columns={col: f"coverage__{col}" for col in final_outlook.columns[-5:]})
+final_outlook.index.name = 'Raw_File'
+final_outlook.pool = [int(p[4]) for p in final_outlook.pool]
+
+# sorting for reading purposes
+final_outlook = final_outlook.reset_index()
+
+final_outlook['no'] = [int(rf.split("_")[1][:3]) for rf in final_outlook.Raw_File]
+final_outlook['raw'] = [rf[:4] for rf in final_outlook.Raw_File]
+final_outlook = final_outlook.sort_values(by=['pool','raw','no'])
+final_outlook = final_outlook.drop(columns=['raw','no'])
+final_outlook.to_csv(Path("D:/projects/proteome_tools/RES/outlook.csv"), index=False)
 
 
-with open(pt/'pool1.json'):
-
-list(res.glob("pool*/*/*/reversed_search/*_report.csv"))
-
+# debugging the search
