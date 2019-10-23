@@ -1,13 +1,13 @@
 """Here we rerun the 40 naughty raw folders that resulted in nothing but pain."""
 
-from pathlib import Path
+import logging
 import numpy as np
 import pandas as pd
+from pathlib import Path
 from pprint import pprint
 from subprocess import TimeoutExpired
 from vodkas.logging import get_logger
 from vodkas import plgs, wx2csv
-
 
 pd.set_option('display.max_rows', 10)
 pd.set_option('display.max_columns', 100)
