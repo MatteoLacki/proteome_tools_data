@@ -12,3 +12,9 @@ DIA[~DIA.index.isin(projects)]
 
 raw_folders = Path("J:/proteome_tools/net")
 raw_folders = {r.stem:r for r in raw_folders.glob("*/WIRD_GESICHERT/[T,S]*/[T,S]*")}
+
+outlook = pd.read_csv(Path("D:/projects/proteome_tools/RES/outlook.csv"))
+coverages = outlook.coverage__target_no_qc_peps
+zero_cover_raw_folders = set(outlook.Raw_File[coverages == 0])
+
+

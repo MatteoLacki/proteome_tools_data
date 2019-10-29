@@ -24,7 +24,6 @@ target = max(FF, key=lambda x: len(str(x))) # this might be the reversed thing, 
 Counter(s in target.sequence for s in set(X.sequence))
 
 "FFLT" in target.sequence
-
 "PEPTIDE" in target.sequence
 list(target.where_is("PEPTIDE"))
 target.coverage(["PEPTIDE"]) * len(target.sequence)
